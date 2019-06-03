@@ -36,11 +36,8 @@ setInterval(() => {
 import { interval, of } from 'rxjs'; 
 import { map, scan } from 'rxjs/operators';
 
-// const source = interval(1000).pipe(
-//   map(_ => getPurchase())
-// );
-
-const source = of(getPurchase()).pipe(
+const source = interval(1000).pipe(
+  map(_ => getPurchase()),
   map(p => purchaseTotalPrice(p)),
   scan((sum, price) => sum + price, 0),
 );
