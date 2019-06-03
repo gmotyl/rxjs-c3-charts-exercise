@@ -17,22 +17,23 @@ var chart = c3.generate({
     bindto: '#chart',
     data: {
       columns: [
-        ['data1', 30, 200, 100, 400, 150, 250],
-        ['data2', 50, 20, 10, 40, 15, 25]
+        ['total', 30, 200, 100, 400, 150, 250],
+        // ['data2', 50, 20, 10, 40, 15, 25]
       ]
     }
 });
 
-setInterval(() => {
+const refreshChart = (values: number[]) => {
     chart.load({
       columns: [
-        ['data1', 30, 200, 100, 400, 150, 250, 200],
-        ['data2', 50, 20, 10, 40, 15, 25, 10]
+        ['total', ...values],
       ]
     });
+}
+
+setInterval(() => {
+    refreshChart([30, 200, 100, 400, 150, 250, 200]);
 }, 2000)
-
-
 
 import { interval, of } from 'rxjs'; 
 import { map, scan } from 'rxjs/operators';
