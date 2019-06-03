@@ -31,7 +31,7 @@ const refreshChart = (data: any) =>
     ]
 });
 
-import { interval, of, pipe } from 'rxjs'; 
+import { interval, of, pipe, merge } from 'rxjs'; 
 import { map, scan, shareReplay } from 'rxjs/operators';
 
 const sumAndRoundHistory = (chartName: string) => pipe(
@@ -61,7 +61,15 @@ const purchaseTaxPrice$ = purchase$.pipe(
   sumAndRoundHistory('tax'),
 )
 
-purchaseTotalPrice$.subscribe(refreshChart);
-purchaseNetPrice$.subscribe(refreshChart);
-purchaseTaxPrice$.subscribe(refreshChart);
+// purchaseTotalPrice$.subscribe(refreshChart);
+// purchaseNetPrice$.subscribe(refreshChart);
+// purchaseTaxPrice$.subscribe(refreshChart);
+
+const chartUpdates$ = merge(
+  purchaseTotalPrice$,
+  purchaseNetPrice$,
+  purchaseTaxPrice$,
+)
+
+chartUpdates$.subscribe(refreshChart);
 
