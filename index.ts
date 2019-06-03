@@ -1,9 +1,13 @@
+
+import { Purchase } from './types';
+
 const jsf = require('json-schema-faker')
 const schema = require('./purchase.schema.json')
 
-const getPurchase = () => jsf(schema)
+const getPurchase = (): Purchase => jsf(schema)
 console.log(getPurchase());
 
+const purchaseTotalPrice = (p: Purchase) => (p.amount * p.unitPrice)
 
 import * as c3 from 'c3'
 import 'c3/c3.css'
@@ -29,11 +33,16 @@ setInterval(() => {
 
 
 
-import { interval } from 'rxjs'; 
-import { map } from 'rxjs/operators';
+import { interval, of } from 'rxjs'; 
+import { map, scan } from 'rxjs/operators';
 
-const source = interval(1000).pipe(
-  map(_ => getPurchase())
+// const source = interval(1000).pipe(
+//   map(_ => getPurchase())
+// );
+
+const source = of(getPurchase()).pipe(
+  map(p => purchaseTotalPrice(p)),
+  scan((sum, price) => sum + price, 0),
 );
 
 source.subscribe(x => console.log(x));
