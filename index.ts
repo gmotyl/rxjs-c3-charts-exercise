@@ -9,6 +9,7 @@ const getPurchase = (): Purchase => jsf(schema)
 console.log(getPurchase());
 
 const purchaseTotalPrice = (p: Purchase) => (p.amount * p.unitPrice)
+const purchaseNetPrice = (p: Purchase) => purchaseTotalPrice(p) * (1 - p.vatTax)
 
 import * as c3 from 'c3'
 import 'c3/c3.css'
@@ -23,13 +24,14 @@ var chart = c3.generate({
     }
 });
 
-const refreshChart = (values: number[]) => {
+const refreshChart = (chartName: string) =>
+  (values: number[]) => {
     chart.load({
       columns: [
-        ['total', ...values],
+        [chartName, ...values]
       ]
     });
-}
+  }
 
 import { interval, of } from 'rxjs'; 
 import { map, scan } from 'rxjs/operators';
@@ -38,17 +40,24 @@ const purchase$ = interval(4000).pipe(
   map(_ => getPurchase()),
 );
 
-const purchasePrice$ = purchase$.pipe(
+const purchaseTotalPrice$ = purchase$.pipe(
   map(p => purchaseTotalPrice(p)),
   scan((sum, price) => sum + price, 0),
   map(to2),
 );
 
-const purchasePriceHistory$ = purchasePrice$.pipe(
-  scan((list, item) => [...list, item], [] as number[])
-);
+const purchaseNetPrice$ = purchase$.pipe(
+  map(p => purchaseTotalPrice(p)),
+  scan((sum, price) => sum + price, 0),
+  map(to2)
+)
+
+const purchasePriceHistory$ = purchaseTotalPrice$.pipe(
+  scan(( list, item ) => [...list, item], [] as number[])
+)
 
 purchasePriceHistory$.subscribe(x => {
-  console.log(x);
-  refreshChart(x);
+  console.log(x)
+  refreshChart('total')(x)
 });
+
