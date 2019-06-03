@@ -38,12 +38,18 @@ setInterval(() => {
 import { interval, of } from 'rxjs'; 
 import { map, scan } from 'rxjs/operators';
 
-const source = interval(4000).pipe(
+const purchase$ = interval(4000).pipe(
   map(_ => getPurchase()),
+);
+
+const purchasePrice$ = purchase$.pipe(
   map(p => purchaseTotalPrice(p)),
   scan((sum, price) => sum + price, 0),
   map(to2),
+);
+
+const purchasePriceHistory$ = purchase$.pipe(
   scan((list, item) => [...list, item], [] as number[])
 );
 
-source.subscribe(x => console.log(x));
+purchasePriceHistory$.subscribe(x => console.log(x));
