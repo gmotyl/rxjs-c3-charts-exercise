@@ -32,7 +32,7 @@ const refreshChart = (data: any) =>
 });
 
 import { interval, of, pipe } from 'rxjs'; 
-import { map, scan } from 'rxjs/operators';
+import { map, scan, share } from 'rxjs/operators';
 
 const sumAndRoundHistory = (chartName: string) => pipe(
   scan((sum: number, price: number) => sum + price, 0),
@@ -43,6 +43,7 @@ const sumAndRoundHistory = (chartName: string) => pipe(
 
 const purchase$ = interval(4000).pipe(
   map(_ => getPurchase()),
+  share(),
 );
 
 const purchaseTotalPrice$ = purchase$.pipe(
@@ -51,7 +52,7 @@ const purchaseTotalPrice$ = purchase$.pipe(
 );
 
 const purchaseNetPrice$ = purchase$.pipe(
-  map(p => purchaseTotalPrice(p)),
+  map(p => purchaseNetPrice(p)),
   sumAndRoundHistory('net'),
 )
 
@@ -59,6 +60,13 @@ const purchaseNetPrice$ = purchase$.pipe(
 
 purchaseTotalPrice$.subscribe(x => {
   console.log(x)
+  refreshChart(x)
+});
+// const 
+
+purchaseNetPrice$.subscribe(x => {
+  console.log(x)
+
   refreshChart(x)
 });
 
