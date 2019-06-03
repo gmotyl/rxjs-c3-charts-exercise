@@ -24,21 +24,21 @@ var chart = c3.generate({
     }
 });
 
-const refreshChart = (chartName: string) =>
-  (values: number[]) => {
-    chart.load({
-      columns: [
-        [chartName, ...values]
-      ]
-    });
-  }
+const refreshChart = (data: any) =>
+  chart.load({
+    columns: [
+      data,
+    ]
+});
 
 import { interval, of, pipe } from 'rxjs'; 
 import { map, scan } from 'rxjs/operators';
 
-const sumAndRound = pipe(
+const sumAndRoundHistory = (chartName: string) => pipe(
   scan((sum: number, price: number) => sum + price, 0),
-  map(to2)  
+  map(to2),
+  scan(( list, item ) => [...list, item], [] as number[]),
+  map(list => [chartName, ...list]),
 );
 
 const purchase$ = interval(4000).pipe(
@@ -47,20 +47,18 @@ const purchase$ = interval(4000).pipe(
 
 const purchaseTotalPrice$ = purchase$.pipe(
   map(p => purchaseTotalPrice(p)),
-  sumAndRound,
+  sumAndRoundHistory('total'),
 );
 
 const purchaseNetPrice$ = purchase$.pipe(
   map(p => purchaseTotalPrice(p)),
-  sumAndRound
+  sumAndRoundHistory('net'),
 )
 
-const purchasePriceHistory$ = purchaseTotalPrice$.pipe(
-  scan(( list, item ) => [...list, item], [] as number[])
-)
+// const 
 
-purchasePriceHistory$.subscribe(x => {
+purchaseTotalPrice$.subscribe(x => {
   console.log(x)
-  refreshChart('total')(x)
+  refreshChart(x)
 });
 
