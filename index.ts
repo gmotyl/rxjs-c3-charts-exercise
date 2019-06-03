@@ -43,6 +43,7 @@ const source = interval(4000).pipe(
   map(p => purchaseTotalPrice(p)),
   scan((sum, price) => sum + price, 0),
   map(to2),
+  scan((list, item) => [...list, item], [] as number[])
 );
 
 source.subscribe(x => console.log(x));
