@@ -31,10 +31,6 @@ const refreshChart = (values: number[]) => {
     });
 }
 
-setInterval(() => {
-    refreshChart([30, 200, 100, 400, 150, 250, 200]);
-}, 2000)
-
 import { interval, of } from 'rxjs'; 
 import { map, scan } from 'rxjs/operators';
 
@@ -48,8 +44,11 @@ const purchasePrice$ = purchase$.pipe(
   map(to2),
 );
 
-const purchasePriceHistory$ = purchase$.pipe(
+const purchasePriceHistory$ = purchasePrice$.pipe(
   scan((list, item) => [...list, item], [] as number[])
 );
 
-purchasePriceHistory$.subscribe(x => console.log(x));
+purchasePriceHistory$.subscribe(x => {
+  console.log(x);
+  refreshChart(x);
+});
