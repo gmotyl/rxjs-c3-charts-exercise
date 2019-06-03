@@ -4,6 +4,7 @@ import { Purchase } from './types';
 const jsf = require('json-schema-faker')
 const schema = require('./purchase.schema.json')
 
+const to2 = (n: number) => Math.round(n * 100) / 100;
 const getPurchase = (): Purchase => jsf(schema)
 console.log(getPurchase());
 
@@ -36,10 +37,11 @@ setInterval(() => {
 import { interval, of } from 'rxjs'; 
 import { map, scan } from 'rxjs/operators';
 
-const source = interval(1000).pipe(
+const source = interval(4000).pipe(
   map(_ => getPurchase()),
   map(p => purchaseTotalPrice(p)),
   scan((sum, price) => sum + price, 0),
+  map(to2),
 );
 
 source.subscribe(x => console.log(x));
