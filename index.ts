@@ -10,6 +10,7 @@ console.log(getPurchase());
 
 const purchaseTotalPrice = (p: Purchase) => (p.amount * p.unitPrice)
 const purchaseNetPrice = (p: Purchase) => purchaseTotalPrice(p) * (1 - p.vatTax)
+const purchaseTaxPrice = (p: Purchase) => purchaseTotalPrice(p) * p.vatTax
 
 import * as c3 from 'c3'
 import 'c3/c3.css'
@@ -19,7 +20,6 @@ var chart = c3.generate({
     data: {
       columns: [
         ['total', 30, 200, 100, 400, 150, 250],
-        // ['data2', 50, 20, 10, 40, 15, 25]
       ]
     }
 });
@@ -32,7 +32,7 @@ const refreshChart = (data: any) =>
 });
 
 import { interval, of, pipe } from 'rxjs'; 
-import { map, scan, share } from 'rxjs/operators';
+import { map, scan, shareReplay } from 'rxjs/operators';
 
 const sumAndRoundHistory = (chartName: string) => pipe(
   scan((sum: number, price: number) => sum + price, 0),
@@ -43,7 +43,7 @@ const sumAndRoundHistory = (chartName: string) => pipe(
 
 const purchase$ = interval(4000).pipe(
   map(_ => getPurchase()),
-  share(),
+  shareReplay(),
 );
 
 const purchaseTotalPrice$ = purchase$.pipe(
@@ -56,17 +56,12 @@ const purchaseNetPrice$ = purchase$.pipe(
   sumAndRoundHistory('net'),
 )
 
-// const 
+const purchaseTaxPrice$ = purchase$.pipe(
+  map(p => purchaseTaxPrice(p)),
+  sumAndRoundHistory('tax'),
+)
 
-purchaseTotalPrice$.subscribe(x => {
-  console.log(x)
-  refreshChart(x)
-});
-// const 
-
-purchaseNetPrice$.subscribe(x => {
-  console.log(x)
-
-  refreshChart(x)
-});
+purchaseTotalPrice$.subscribe(refreshChart);
+purchaseNetPrice$.subscribe(refreshChart);
+purchaseTaxPrice$.subscribe(refreshChart);
 
